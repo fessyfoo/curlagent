@@ -14,6 +14,15 @@ curl.
 create a text file in $HOME/.config/curlagent/agents each line containing
 a user agent string
 
+Perhaps [pzb](https://github.com/pzb)'s [list](https://gist.github.com/pzb/b4b6f57144aea7827ae4)
+
+```
+curl \
+  --create-dirs \
+  --output ~/.config/curlagent/agents \
+  https://gist.githubusercontent.com/pzb/b4b6f57144aea7827ae4/raw/user-agents.txt
+```
+
 ## usage
 
 `curlagent [--agent-refresh] [CURL_ARGS]`
