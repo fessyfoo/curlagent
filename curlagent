@@ -2,7 +2,7 @@
 
 
 bail () {
-  echo "$@"
+  echo "$@" >&2
   exit 1
 }
 
@@ -16,26 +16,35 @@ last_agent="$conf_dir/last_agent"
 
 
 # get a random agent line by resevoir sampling
-get_agent () {
-  awk \
-    'BEGIN { srand() } { if (rand() < 1/NR) line=$0 } END { print line }' \
-    "$agent_list"
+pick_agent () {
+  test -e "$agent_list" ||
+    bail "missing agent list: $agent_list"
+
+  agent=$(
+    awk \
+      'BEGIN { srand() } { if (rand() < 1/NR) line=$0 } END { print line }' \
+      "$agent_list"
+  )
+}
+
+ensure_conf_dir () {
+  test -d "$conf_dir" ||
+    mkdir -p "$conf_dir" ||
+    bail "failed to make confg dir: $conf_dir"
 }
 
 load_agent () {
   test -n "$agent" && return
 
+  ensure_conf_dir
+
   if test -e "$last_agent"
   then
     agent="$(cat "$last_agent")"
   else
-    agent=$(get_agent)
-    echo "$agent" > "$last_agent"
+    pick_agent &&
+      echo "$agent" > "$last_agent"
   fi
-}
-
-update_cached_agent () {
-  get_agent > "$last_agent"
 }
 
 print_agent=""
