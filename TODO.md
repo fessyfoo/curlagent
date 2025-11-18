@@ -1,0 +1,3 @@
+- add option to fetch a list of agents from somewhere
+- add --help option, with usage and explanation
+  - add --help-curl option to call curl's help instead
