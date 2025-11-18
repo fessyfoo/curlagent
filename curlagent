@@ -1,0 +1,70 @@
+#!/bin/sh
+
+
+bail () {
+  echo "$@"
+  exit 1
+}
+
+test -z "$HOME" && bail "expected HOME env var set"
+
+agent=""
+marker="__CURLAGENT_ARG_MARKER__"
+conf_dir="$HOME/.config/curlagent"
+agent_list="$conf_dir/agents"
+last_agent="$conf_dir/last_agent"
+
+
+# get a random agent line by resevoir sampling
+get_agent () {
+  awk \
+    'BEGIN { srand() } { if (rand() < 1/NR) line=$0 } END { print line }' \
+    "$agent_list"
+}
+
+load_agent () {
+  test -n "$agent" && return
+
+  if test -e "$last_agent"
+  then
+    agent="$(cat "$last_agent")"
+  else
+    agent=$(get_agent)
+    echo "$agent" > "$last_agent"
+  fi
+}
+
+update_cached_agent () {
+  get_agent > "$last_agent"
+}
+
+print_agent=""
+set -- "$@" $marker
+while test "$1" != "$marker"; do
+  case "$1" in
+    --agent-refresh)
+      rm -f "$last_agent"
+      ;;
+    --agent-show)
+      print_agent=1
+      ;;
+    *)
+      set -- "$@" "$1"
+      ;;
+  esac
+  shift
+done
+shift
+
+# if arg for fresh agent delete cached agent
+#
+# if cached agent doesn't exist create it
+# read agent from cached agent
+# do curl
+
+load_agent
+test -z "$print_agent" ||
+  test -z "$1" && # todo usage  on empty string
+  echo "$agent"
+test -z "$1" && exit
+exec curl --user-agent "$agent" "$@"
