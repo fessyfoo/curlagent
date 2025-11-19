@@ -47,6 +47,7 @@ load_agent () {
   fi
 }
 
+
 print_agent=""
 set -- "$@" $marker
 while test "$1" != "$marker"; do
@@ -65,11 +66,6 @@ while test "$1" != "$marker"; do
 done
 shift
 
-# if arg for fresh agent delete cached agent
-#
-# if cached agent doesn't exist create it
-# read agent from cached agent
-# do curl
 
 load_agent
 test -z "$print_agent" ||
